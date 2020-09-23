@@ -53,20 +53,20 @@ export class UpdateHandler implements Handler {
             console.log('Update downloaded');
         });
 
-        ipcMain.on('checkForUpdates', () => autoUpdater.checkForUpdates());
-        ipcMain.on('quitAndInstall', () => {
-            uiHandler.quitImmediately = true;
-            autoUpdater.quitAndInstall()
-        });
-        ipcMain.on('downloadUpdate', () => {
-            autoUpdater.downloadUpdate();
-        });
+        // ipcMain.on('checkForUpdates', () => autoUpdater.checkForUpdates());
+        // ipcMain.on('quitAndInstall', () => {
+        //     uiHandler.quitImmediately = true;
+        //     autoUpdater.quitAndInstall()
+        // });
+        // ipcMain.on('downloadUpdate', () => {
+        //     autoUpdater.downloadUpdate();
+        // });
 
         // since it's a ReplaySubject it's guaranted that i'll be executed at least once
         settingsHandler.onSettingsChanged.subscribe((settings: SettingsModel) => {
             if (this.autoUpdate != this.settingsHandler.autoUpdate) {
                 this.autoUpdate = this.settingsHandler.autoUpdate;
-                this.doUpdate();
+                // this.doUpdate();
             }
         });
     }
@@ -84,16 +84,18 @@ export class UpdateHandler implements Handler {
     }
 
     doUpdate() {
-        if (this.autoUpdate) {
-            autoUpdater.autoDownload = true;
-            autoUpdater.autoInstallOnAppQuit = true;
-            autoUpdater.checkForUpdates().then(result => {
-                console.log('Autoupdater:', result)
-            });
-        } else {
-            autoUpdater.autoDownload = false;
-            autoUpdater.autoInstallOnAppQuit = false;
-        }
+        autoUpdater.autoDownload = false;
+        autoUpdater.autoInstallOnAppQuit = false;
+        // if (this.autoUpdate) {
+        //     autoUpdater.autoDownload = true;
+        //     autoUpdater.autoInstallOnAppQuit = true;
+        //     autoUpdater.checkForUpdates().then(result => {
+        //         console.log('Autoupdater:', result)
+        //     });
+        // } else {
+        //     autoUpdater.autoDownload = false;
+        //     autoUpdater.autoInstallOnAppQuit = false;
+        // }
     }
 
     async onWsMessage(ws: WebSocket, message: any, req: http.IncomingMessage): Promise<any> {

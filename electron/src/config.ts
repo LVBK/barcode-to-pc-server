@@ -18,7 +18,6 @@ export class Config {
 
   public static URL_LICENSE_SERVER = 'https://license.barcodetopc.com';
   public static URL_ORDER_CHECK = Config.URL_LICENSE_SERVER + '/order/check';
-  public static URL_ORDER_DEACTIVATE = Config.URL_LICENSE_SERVER + '/order/remove';
 
   public static URL_PRICING = Config.URL_WEBSITE + '/pricing/';
   public static URL_DOWNLOAD_SERVER = Config.URL_WEBSITE + '/#download-server';

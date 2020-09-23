@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import ElectronStore from 'electron-store';
 import { Alert, AlertController, AlertOptions } from 'ionic-angular';
@@ -104,62 +104,15 @@ export class LicenseProvider {
 
     this.store.set(Config.STORAGE_MONTHLY_SCAN_COUNT, 0);
     this.store.set(Config.STORAGE_NEXT_CHARGE_DATE, this.generateNextChargeDate());
-
-
-    this.http.post(Config.URL_ORDER_CHECK, {
-      serial: this.serial,
-      uuid: this.electronProvider.uuid
-    }).subscribe(value => {
-      this.store.set(Config.STORAGE_FIRST_LICENSE_CHECK_FAIL_DATE, 0);
-      if (value['active'] == true) {
-
-        // If the plan name changed it means that a plan UPGRADE has been performed
-        if (this.activePlan != value['plan']) {
-          console.log('upgrade')
-          this.store.set(Config.STORAGE_NEXT_CHARGE_DATE, this.generateNextChargeDate());
-          this.store.set(Config.STORAGE_SUBSCRIPTION, value['plan']);
-          this.activePlan = value['plan'];
-        }
-
-        if (serial) {
-          let everActivated = this.store.get(Config.STORAGE_LICENSE_EVER_ACTIVATED, false);
-          if (!everActivated) {
-            this.store.set(Config.STORAGE_MONTHLY_SCAN_COUNT, 0);
-          }
-          this.store.set(Config.STORAGE_LICENSE_EVER_ACTIVATED, true);
-          this.utilsProvider.showSuccessNativeDialog('The license has been activated successfully');
-          window.confetti.start(3000);
-        }
-      } else {
-        // When the license-server says that the subscription is not active
-        // the user should be propted immediatly, no matter what is passed a
-        // serial or not.
-        this.deactivate();
-        this.utilsProvider.showErrorNativeDialog(value['message']);
+    if (serial) {
+      let everActivated = this.store.get(Config.STORAGE_LICENSE_EVER_ACTIVATED, false);
+      if (!everActivated) {
+        this.store.set(Config.STORAGE_MONTHLY_SCAN_COUNT, 0);
       }
-    }, (error: HttpErrorResponse) => {
-      if (serial) {
-        // if (error.status == 503) {
-        //   this.utilsProvider.showErrorNativeDialog('Unable to fetch the subscription information, try later (FS problem)');
-        // }
-        this.deactivate();
-        this.utilsProvider.showErrorNativeDialog('Unable to activate the license. Please make you sure that your internet connection is active and try again. If the error persists please contact the support.');
-      } else {
-        // Perhaps there is a connection problem, wait 15 days before asking the
-        // user to enable the connection.
-        // For simplicty the STORAGE_FIRST_LICENSE_CHECK_FAIL_DATE field is used
-        // only within this method
-        let firstFailDate = this.store.get(Config.STORAGE_FIRST_LICENSE_CHECK_FAIL_DATE, 0);
-        let now = new Date().getTime();
-        if (firstFailDate && (now - firstFailDate) > 1296000000) { //  15 days = 1296000000 ms
-          this.store.set(Config.STORAGE_FIRST_LICENSE_CHECK_FAIL_DATE, 0);
-          this.deactivate();
-          this.utilsProvider.showErrorNativeDialog('Unable to verify your license. Please make you sure that the computer has an active internet connection');
-        } else {
-          this.store.set(Config.STORAGE_FIRST_LICENSE_CHECK_FAIL_DATE, now);
-        }
-      }
-    })
+      this.store.set(Config.STORAGE_LICENSE_EVER_ACTIVATED, true);
+      this.utilsProvider.showSuccessNativeDialog('The license has been activated successfully');
+      window.confetti.start(3000);
+    }
   } // updateSubscriptionStatus
 
   /**
@@ -179,23 +132,6 @@ export class LicenseProvider {
    * the deactivation process.
    */
   deactivate(clearSerial = false) {
-    let downgradeToFree = () => {
-    }
-
-    if (clearSerial) {
-      this.http.post(Config.URL_ORDER_DEACTIVATE, {
-        serial: this.serial,
-        uuid: this.electronProvider.uuid
-      }).subscribe(value => {
-        downgradeToFree();
-        this.serial = '';
-        this.store.set(Config.STORAGE_SERIAL, this.serial);
-      }, (error: HttpErrorResponse) => {
-        this.utilsProvider.showErrorNativeDialog('Unable to deactivate the license. Please make you sure that the computer has an active internet connection');
-      });
-    } else {
-      downgradeToFree();
-    }
   }
 
   showPricingPage(refer) {
