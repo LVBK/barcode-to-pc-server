@@ -38,7 +38,7 @@ export class LicenseProvider {
   public static PLAN_PRO = 'barcode-to-pc-pro-license';
   public static PLAN_UNLIMITED = 'barcode-to-pc-unlimited-license';
 
-  public activePlan = LicenseProvider.PLAN_FREE;
+  public activePlan = LicenseProvider.PLAN_UNLIMITED;
   public serial = '';
 
   private store: ElectronStore;
@@ -59,9 +59,9 @@ export class LicenseProvider {
     })
 
     this.devicesProvider.onDeviceDisconnect().pipe(throttle(ev => interval(1000 * 60))).subscribe(device => {
-      if (this.activePlan == LicenseProvider.PLAN_FREE) {
-        this.showUpgradeDialog('commercialUse', 'Free plan', 'Your current plan is for non-commercial use only. Please switch to a paid plan if you are using Barcode to PC for commercial purposes')
-      }
+      // if (this.activePlan == LicenseProvider.PLAN_FREE) {
+      //   this.showUpgradeDialog('commercialUse', 'Free plan', 'Your current plan is for non-commercial use only. Please switch to a paid plan if you are using Barcode to PC for commercial purposes')
+      // }
     })
 
     this.devicesProvider.onDeviceConnect().subscribe(device => {
@@ -93,7 +93,7 @@ export class LicenseProvider {
    * If the serial is passed it'll prompt the user with dialogs
    */
   updateSubscriptionStatus(serial: string = '') {
-    this.activePlan = this.store.get(Config.STORAGE_SUBSCRIPTION, LicenseProvider.PLAN_FREE)
+    // this.activePlan = this.store.get(Config.STORAGE_SUBSCRIPTION, LicenseProvider.PLAN_FREE)
 
     if (serial) {
       this.serial = serial;
@@ -102,23 +102,9 @@ export class LicenseProvider {
       this.serial = this.store.get(Config.STORAGE_SERIAL, '')
     }
 
-    let now = new Date().getTime();
-    let nextChargeDate = this.store.get(Config.STORAGE_NEXT_CHARGE_DATE);
-    let canResetScanCount = now > nextChargeDate;
+    this.store.set(Config.STORAGE_MONTHLY_SCAN_COUNT, 0);
+    this.store.set(Config.STORAGE_NEXT_CHARGE_DATE, this.generateNextChargeDate());
 
-    // The scanCount is resetted based on the server first run date
-    if (canResetScanCount) {
-      this.store.set(Config.STORAGE_MONTHLY_SCAN_COUNT, 0);
-      this.store.set(Config.STORAGE_NEXT_CHARGE_DATE, this.generateNextChargeDate());
-    }
-
-    // Do not bother the license-server if there isn't an active subscription
-    if (serial == '' && this.serial == '' && this.activePlan == LicenseProvider.PLAN_FREE) {
-      // it's also required to check this.serial == '' because when there isn't
-      // a internet connection the plan gets downgraded but the serial is
-      // still saved to the storage
-      return;
-    }
 
     this.http.post(Config.URL_ORDER_CHECK, {
       serial: this.serial,
@@ -194,19 +180,6 @@ export class LicenseProvider {
    */
   deactivate(clearSerial = false) {
     let downgradeToFree = () => {
-      this.activePlan = LicenseProvider.PLAN_FREE;
-      this.store.set(Config.STORAGE_SUBSCRIPTION, this.activePlan);
-
-      let settings: SettingsModel = this.store.get(Config.STORAGE_SETTINGS, new SettingsModel());
-      if (!this.canUseCSVAppend(false)) {
-        settings.appendCSVEnabled = false;
-      }
-      if (!this.canUseNumberParameter(false)) {
-        for (let i in settings.outputProfiles) {
-          settings.outputProfiles[i].outputBlocks = settings.outputProfiles[i].outputBlocks.filter(x => x.value != 'number');
-        }
-      }
-      this.store.set(Config.STORAGE_SETTINGS, settings);
     }
 
     if (clearSerial) {
