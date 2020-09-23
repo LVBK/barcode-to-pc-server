@@ -116,6 +116,8 @@
     "electron-log": "^3.0.0",
     "electron-notarize": "^0.2.1",
     "gulp": "^3.9.1",
+    "gulp-github-release": "^1.2.1",
+    "gulp-zip": "^5.0.2",
     "mocha": "^5.2.0",
     "npx": "^10.2.0",
     "spectron": "^3.8.0",

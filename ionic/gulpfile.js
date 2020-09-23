@@ -5,7 +5,7 @@ const typescript = require('../node_modules/typescript')
 const mocha = require('../node_modules/mocha')
 const fs = require('fs');
 const zip = require('gulp-zip');
-const release = require('fttx-gulp-github-release');
+const release = require('gulp-github-release');
 
 gulp.task('serve', ['electron:assets', 'ionic:install'], () => {
   const ionicConfig = require('@ionic/app-scripts/dist/util/config')
