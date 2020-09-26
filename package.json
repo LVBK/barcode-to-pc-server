@@ -45,7 +45,18 @@
       }
     ],
     "productName": "Barcode to PC server",
-    "afterSign": "../electron/notarize.js",
+    "win": {
+      "target": [
+        {
+          "target": "nsis-web",
+          "arch": [
+            "x64",
+            "ia32"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
     "mac": {
       "category": "public.app-category.utilities",
       "hardenedRuntime": true,
@@ -60,19 +71,6 @@
     },
     "dmg": {
       "sign": false
-    },
-    "win": {
-      "certificateSha1": "EDEB0B36E791F01F813F36B92EA335C860AC3838",
-      "target": [
-        {
-          "target": "nsis-web",
-          "arch": [
-            "x64",
-            "ia32"
-          ]
-        }
-      ],
-      "icon": "build/icon.ico"
     },
     "linux": {
       "target": "AppImage"

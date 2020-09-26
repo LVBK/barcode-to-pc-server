@@ -164,7 +164,7 @@ export class HomePage {
 
       // older versions of the app didn't send the version number
       if (!request.version) {
-        this.showVersionMismatch();
+        // this.showVersionMismatch();
         return;
       }
 

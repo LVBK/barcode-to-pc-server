@@ -100,7 +100,7 @@ gulp.task('dist', ['build'], () => {
 
 gulp.task('publish', [], () => {
   return new Promise((resolve, reject) => {
-    electronBuilder.build({ projectDir: '../dist', publish: 'always' }).then(result => {
+    electronBuilder.build({ projectDir: '../dist', publish: 'never' }).then(result => {
       if (process.platform.startsWith('win')) {
         // Offline installer for Windows only
         gulp.src('../dist/dist/nsis-web/*')
